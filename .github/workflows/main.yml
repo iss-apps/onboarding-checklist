@@ -3,20 +3,8 @@ name: Build and Deploy Onboarding Checklists
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'staff-onboarding.md'
-      - 'student-onboarding.md'
-      - 'doc/template.html'
-      - 'doc/logo.png'
-      - 'tools/build.py'
   pull_request:
     branches: [ main ]
-    paths:
-      - 'staff-onboarding.md'
-      - 'student-onboarding.md'
-      - 'doc/template.html'
-      - 'doc/logo.png'
-      - 'tools/build.py'
 
 permissions:
   contents: read
@@ -71,7 +59,7 @@ jobs:
       uses: actions/configure-pages@v4
       
     - name: Upload to Pages
-      uses: actions/upload-pages-artifact@v4
+      uses: actions/upload-pages-artifact@v3
       with:
         path: dist/
         
