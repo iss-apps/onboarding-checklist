@@ -1,0 +1,7 @@
+# No external dependencies required
+# The build script only uses Python standard library modules:
+# - os
+# - re
+# - base64
+# - subprocess
+# - pathlib
