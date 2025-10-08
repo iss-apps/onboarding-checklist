@@ -9,6 +9,7 @@ description: "Welcome to ISS! This checklist will guide you through the essentia
 
 - [ ] **Sign into Chrome with your school account**
   - Open Chrome and follow prompts to sign-in
+  - IT will assist with your first login, and you will be prompted to scan your MFA QR code. You may scan the code into your phone and/or iPad. Enter the time-based code to proceed.
   - When prompted, choose **"No, continue to use profile for school"**
   - Enable **"Turn on Sync"** to sync bookmarks and settings
 
@@ -36,3 +37,11 @@ description: "Welcome to ISS! This checklist will guide you through the essentia
   - Go to **System Settings** → **Touch ID & Password**
   - Follow the setup prompts to add your fingerprint
   - This allows you to unlock your Mac with just a touch
+
+- [ ] **Sign into iSAMS**
+  - Open [https://isstavanger.onelogin.com](https://isstavanger.onelogin.com)
+  - Once you've reached the OneLogin dashboard, select iSAMS
+  - At the iSAMS login page, choose **Sign in via OneLogin**.
+  - Check your [inbox](https://gmail.com) for the one-time verification code.
+  - Scan the MFA QR code on your Mac, iPad, and cell phone.
+  - Once the code is on all devices, click to continue and enter the time-based code.
