@@ -300,7 +300,7 @@ def main():
         staff_manifest = create_simplified_manifest(
             "ISS Staff Onboarding Checklist",
             "ISS Staff",
-            "/staff.html",
+            "onboarding-checklist/staff.html",
             template_json
         )
         
@@ -312,7 +312,7 @@ def main():
         student_manifest = create_simplified_manifest(
             "ISS Student Onboarding Checklist", 
             "ISS Student",
-            "/student.html",
+            "onboarding-checklist/student.html",
             template_json
         )
         
