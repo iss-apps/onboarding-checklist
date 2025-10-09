@@ -11,9 +11,30 @@ import subprocess
 import shutil
 from pathlib import Path
 from PIL import Image
+from datetime import datetime
 
 # Configuration flag - set to False to copy logo file instead of embedding as base64
 BASE64_LOGO = False
+
+def generate_version():
+    """Generate version string using date-githash format."""
+    try:
+        # Get current date in YYYY-MM-DD format
+        date_str = datetime.now().strftime('%Y-%m-%d')
+        
+        # Get short git hash (7 characters)
+        result = subprocess.run(
+            ['git', 'rev-parse', '--short=7', 'HEAD'],
+            capture_output=True,
+            text=True,
+            check=True
+        )
+        git_hash = result.stdout.strip()
+        
+        return f"{date_str}-{git_hash}"
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # Fallback if git is not available
+        return datetime.now().strftime('%Y-%m-%d-%fallback')
 
 def parse_markdown_file(file_path):
     """Parse markdown file and extract frontmatter and content."""
@@ -238,7 +259,7 @@ def load_manifest_template(template_path):
     with open(template_path, 'r', encoding='utf-8') as f:
         return json.load(f)
 
-def create_simplified_manifest(name, short_name, start_url, template_path):
+def create_simplified_manifest(name, short_name, start_url, template_path, version):
     """Create a simplified PWA manifest using template."""
     template = load_manifest_template(template_path)
     
@@ -248,6 +269,7 @@ def create_simplified_manifest(name, short_name, start_url, template_path):
     manifest["short_name"] = short_name
     manifest["start_url"] = start_url
     manifest["scope"] = start_url
+    manifest["version"] = version
     
     return manifest
 
@@ -281,6 +303,10 @@ def main():
         
         print("Building onboarding checklists...")
         
+        # Generate version
+        version = generate_version()
+        print(f"Generated version: {version}")
+        
         # Generate logo sizes
         print("Generating logo assets...")
         generate_logo_sizes(logo_png, assets_dir)
@@ -301,7 +327,8 @@ def main():
             "ISS Staff Onboarding Checklist",
             "ISS Staff",
             "staff.html",
-            template_json
+            template_json,
+            version
         )
         
         with open(dist_dir / 'staff-manifest.json', 'w', encoding='utf-8') as f:
@@ -313,7 +340,8 @@ def main():
             "ISS Student Onboarding Checklist", 
             "ISS Student",
             "student.html",
-            template_json
+            template_json,
+            version
         )
         
         with open(dist_dir / 'student-manifest.json', 'w', encoding='utf-8') as f:
