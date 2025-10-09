@@ -153,7 +153,7 @@ def generate_checklist_html(items):
     
     return '\n'.join(html_parts)
 
-def fill_template(template_path, frontmatter, checklist_html, logo_data):
+def fill_template(template_path, frontmatter, checklist_html, logo_data, manifest_path):
     """Fill template with extracted data."""
     with open(template_path, 'r', encoding='utf-8') as f:
         template = f.read()
@@ -164,6 +164,7 @@ def fill_template(template_path, frontmatter, checklist_html, logo_data):
     template = template.replace('{{description}}', frontmatter.get('description', ''))
     template = template.replace('{{logo}}', logo_data)
     template = template.replace('{{content}}', checklist_html)
+    template = template.replace('{{manifest}}', manifest_path)
     
     return template
 
@@ -186,7 +187,7 @@ def lint_html(html_content):
 
 
 
-def build_checklist(markdown_file, output_file, template_html, logo_png, dist_dir, assets_dir):
+def build_checklist(markdown_file, output_file, template_html, logo_png, dist_dir, assets_dir, manifest_path):
     """Build a single checklist from markdown file."""
     print(f"  Processing {markdown_file.name}...")
     
@@ -218,7 +219,7 @@ def build_checklist(markdown_file, output_file, template_html, logo_png, dist_di
     
     # Fill template
     print("    Filling template...")
-    final_html = fill_template(template_html, frontmatter, checklist_html, logo_data)
+    final_html = fill_template(template_html, frontmatter, checklist_html, logo_data, manifest_path)
     
     # Lint HTML
     print("    Linting HTML...")
@@ -302,11 +303,11 @@ def main():
         
         # Build staff checklist
         print("Building staff checklist...")
-        build_checklist(staff_md, staff_output, template_html, logo_png, dist_dir, assets_dir)
+        build_checklist(staff_md, staff_output, template_html, logo_png, dist_dir, assets_dir, 'staff-manifest.json')
         
         # Build student checklist
         print("Building student checklist...")
-        build_checklist(student_md, student_output, template_html, logo_png, dist_dir, assets_dir)
+        build_checklist(student_md, student_output, template_html, logo_png, dist_dir, assets_dir, 'student-manifest.json')
         
         # Create simplified manifests
         print("Creating PWA manifests...")
