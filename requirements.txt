@@ -1,7 +1,10 @@
-# No external dependencies required
-# The build script only uses Python standard library modules:
+# External dependencies required
+Pillow>=9.0.0
+
+# Python standard library modules used:
 # - os
 # - re
 # - base64
 # - subprocess
 # - pathlib
+# - json

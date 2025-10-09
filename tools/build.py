@@ -8,7 +8,12 @@ import os
 import re
 import base64
 import subprocess
+import shutil
 from pathlib import Path
+from PIL import Image
+
+# Configuration flag - set to False to copy logo file instead of embedding as base64
+BASE64_LOGO = False
 
 def parse_markdown_file(file_path):
     """Parse markdown file and extract frontmatter and content."""
@@ -40,6 +45,44 @@ def encode_logo_to_base64(logo_path):
     with open(logo_path, 'rb') as f:
         logo_data = f.read()
     return base64.b64encode(logo_data).decode('utf-8')
+
+def generate_logo_sizes(logo_path, assets_dir):
+    """Generate different sized logos from the source logo."""
+    print("    Generating logo sizes...")
+    
+    # Define the sizes we need for PWA manifests
+    sizes = [
+        (32, 32),
+        (96, 96), 
+        (192, 192),
+        (512, 512)
+    ]
+    
+    try:
+        # Open the source image
+        with Image.open(logo_path) as img:
+            # Convert to RGBA if not already (for transparency support)
+            if img.mode != 'RGBA':
+                img = img.convert('RGBA')
+            
+            generated_files = []
+            
+            for width, height in sizes:
+                # Resize image maintaining aspect ratio and quality
+                resized = img.resize((width, height), Image.Resampling.LANCZOS)
+                
+                # Save to assets directory
+                filename = f"logo-{width}x{height}.png"
+                output_path = assets_dir / filename
+                resized.save(output_path, 'PNG', optimize=True)
+                generated_files.append(filename)
+                print(f"      Generated {filename}")
+            
+            return generated_files
+            
+    except Exception as e:
+        print(f"      Error generating logo sizes: {e}")
+        return []
 
 def convert_markdown_to_html(text):
     """Convert markdown formatting to HTML."""
@@ -110,7 +153,7 @@ def generate_checklist_html(items):
     
     return '\n'.join(html_parts)
 
-def fill_template(template_path, frontmatter, checklist_html, logo_base64):
+def fill_template(template_path, frontmatter, checklist_html, logo_data):
     """Fill template with extracted data."""
     with open(template_path, 'r', encoding='utf-8') as f:
         template = f.read()
@@ -119,7 +162,7 @@ def fill_template(template_path, frontmatter, checklist_html, logo_base64):
     template = template.replace('{{title}}', frontmatter.get('title', ''))
     template = template.replace('{{subtitle}}', frontmatter.get('subtitle', ''))
     template = template.replace('{{description}}', frontmatter.get('description', ''))
-    template = template.replace('{{LogoBase64}}', logo_base64)
+    template = template.replace('{{logo}}', logo_data)
     template = template.replace('{{content}}', checklist_html)
     
     return template
@@ -143,7 +186,7 @@ def lint_html(html_content):
 
 
 
-def build_checklist(markdown_file, output_file, template_html, logo_png):
+def build_checklist(markdown_file, output_file, template_html, logo_png, dist_dir, assets_dir):
     """Build a single checklist from markdown file."""
     print(f"  Processing {markdown_file.name}...")
     
@@ -152,10 +195,17 @@ def build_checklist(markdown_file, output_file, template_html, logo_png):
     frontmatter, markdown_content = parse_markdown_file(markdown_file)
     print(f"      Found frontmatter: {list(frontmatter.keys())}")
     
-    # Encode logo
-    print("    Encoding logo...")
-    logo_base64 = encode_logo_to_base64(logo_png)
-    print(f"      Logo encoded ({len(logo_base64)} characters)")
+    # Handle logo based on configuration
+    if BASE64_LOGO:
+        print("    Encoding logo to base64...")
+        logo_data = encode_logo_to_base64(logo_png)
+        print(f"      Logo encoded ({len(logo_data)} characters)")
+    else:
+        print("    Copying logo file...")
+        logo_dest = assets_dir / 'logo-lg.png'
+        shutil.copy2(logo_png, logo_dest)
+        logo_data = 'assets/logo-lg.png'  # Use relative path
+        print(f"      Logo copied to {logo_dest}")
     
     # Parse checklist items
     print("    Parsing checklist items...")
@@ -168,7 +218,7 @@ def build_checklist(markdown_file, output_file, template_html, logo_png):
     
     # Fill template
     print("    Filling template...")
-    final_html = fill_template(template_html, frontmatter, checklist_html, logo_base64)
+    final_html = fill_template(template_html, frontmatter, checklist_html, logo_data)
     
     # Lint HTML
     print("    Linting HTML...")
@@ -181,6 +231,42 @@ def build_checklist(markdown_file, output_file, template_html, logo_png):
     
     return final_html
 
+def create_simplified_manifest(name, short_name, start_url, assets_dir):
+    """Create a simplified PWA manifest similar to Gmail's structure."""
+    return {
+        "name": name,
+        "short_name": short_name,
+        "background_color": "#FFFFFF",
+        "display": "browser",
+        "start_url": start_url,
+        "scope": start_url,
+        "icons": [
+            {
+                "src": f"assets/logo-32x32.png",
+                "sizes": "32x32",
+                "type": "image/png"
+            },
+            {
+                "src": f"assets/logo-96x96.png",
+                "sizes": "96x96",
+                "type": "image/png"
+            },
+            {
+                "src": f"assets/logo-192x192.png",
+                "sizes": "192x192",
+                "type": "image/png"
+            },
+            {
+                "src": f"assets/logo-512x512.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ],
+        "theme_color": "#FFFFFF",
+        "related_applications": [],
+        "shortcuts": []
+    }
+
 def main():
     """Main build function."""
     try:
@@ -192,6 +278,7 @@ def main():
         template_html = project_root / 'doc' / 'template.html'
         logo_png = project_root / 'doc' / 'logo.png'
         dist_dir = project_root / 'dist'
+        assets_dir = dist_dir / 'assets'
         staff_output = dist_dir / 'staff.html'
         student_output = dist_dir / 'student.html'
         
@@ -201,23 +288,60 @@ def main():
             if not file_path.exists():
                 raise FileNotFoundError(f"Required file not found: {file_path}")
         
-        # Ensure dist directory exists
+        # Clean and ensure directories exist
+        if dist_dir.exists():
+            shutil.rmtree(dist_dir)
         dist_dir.mkdir(exist_ok=True)
+        assets_dir.mkdir(exist_ok=True)
         
         print("Building onboarding checklists...")
         
+        # Generate logo sizes
+        print("Generating logo assets...")
+        generate_logo_sizes(logo_png, assets_dir)
+        
         # Build staff checklist
         print("Building staff checklist...")
-        build_checklist(staff_md, staff_output, template_html, logo_png)
+        build_checklist(staff_md, staff_output, template_html, logo_png, dist_dir, assets_dir)
         
         # Build student checklist
         print("Building student checklist...")
-        build_checklist(student_md, student_output, template_html, logo_png)
+        build_checklist(student_md, student_output, template_html, logo_png, dist_dir, assets_dir)
+        
+        # Create simplified manifests
+        print("Creating PWA manifests...")
+        
+        # Staff manifest
+        staff_manifest = create_simplified_manifest(
+            "ISS Staff Onboarding Checklist",
+            "ISS Staff",
+            "/staff.html",
+            assets_dir
+        )
+        
+        with open(dist_dir / 'staff-manifest.json', 'w', encoding='utf-8') as f:
+            import json
+            json.dump(staff_manifest, f, indent=2)
+        
+        # Student manifest
+        student_manifest = create_simplified_manifest(
+            "ISS Student Onboarding Checklist", 
+            "ISS Student",
+            "/student.html",
+            assets_dir
+        )
+        
+        with open(dist_dir / 'student-manifest.json', 'w', encoding='utf-8') as f:
+            import json
+            json.dump(student_manifest, f, indent=2)
         
         print("Build complete! ✅")
         print(f"Output files:")
         print(f"  - {staff_output}")
         print(f"  - {student_output}")
+        print(f"  - {dist_dir / 'staff-manifest.json'}")
+        print(f"  - {dist_dir / 'student-manifest.json'}")
+        print(f"  - Logo assets in {assets_dir}")
         
     except Exception as e:
         print(f"Build failed: {e}")
