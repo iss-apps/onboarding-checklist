@@ -232,41 +232,24 @@ def build_checklist(markdown_file, output_file, template_html, logo_png, dist_di
     
     return final_html
 
-def create_simplified_manifest(name, short_name, start_url, assets_dir):
-    """Create a simplified PWA manifest similar to Gmail's structure."""
-    return {
-        "name": name,
-        "short_name": short_name,
-        "background_color": "#FFFFFF",
-        "display": "browser",
-        "start_url": start_url,
-        "scope": start_url,
-        "icons": [
-            {
-                "src": f"assets/logo-32x32.png",
-                "sizes": "32x32",
-                "type": "image/png"
-            },
-            {
-                "src": f"assets/logo-96x96.png",
-                "sizes": "96x96",
-                "type": "image/png"
-            },
-            {
-                "src": f"assets/logo-192x192.png",
-                "sizes": "192x192",
-                "type": "image/png"
-            },
-            {
-                "src": f"assets/logo-512x512.png",
-                "sizes": "512x512",
-                "type": "image/png"
-            }
-        ],
-        "theme_color": "#FFFFFF",
-        "related_applications": [],
-        "shortcuts": []
-    }
+def load_manifest_template(template_path):
+    """Load manifest template from JSON file."""
+    import json
+    with open(template_path, 'r', encoding='utf-8') as f:
+        return json.load(f)
+
+def create_simplified_manifest(name, short_name, start_url, template_path):
+    """Create a simplified PWA manifest using template."""
+    template = load_manifest_template(template_path)
+    
+    # Replace template variables
+    manifest = template.copy()
+    manifest["name"] = name
+    manifest["short_name"] = short_name
+    manifest["start_url"] = start_url
+    manifest["scope"] = start_url
+    
+    return manifest
 
 def main():
     """Main build function."""
@@ -277,6 +260,7 @@ def main():
         staff_md = project_root / 'staff-onboarding.md'
         student_md = project_root / 'student-onboarding.md'
         template_html = project_root / 'doc' / 'template.html'
+        template_json = project_root / 'doc' / 'template.json'
         logo_png = project_root / 'doc' / 'logo.png'
         dist_dir = project_root / 'dist'
         assets_dir = dist_dir / 'assets'
@@ -284,7 +268,7 @@ def main():
         student_output = dist_dir / 'student.html'
         
         # Validate input files exist
-        required_files = [staff_md, student_md, template_html, logo_png]
+        required_files = [staff_md, student_md, template_html, template_json, logo_png]
         for file_path in required_files:
             if not file_path.exists():
                 raise FileNotFoundError(f"Required file not found: {file_path}")
@@ -317,7 +301,7 @@ def main():
             "ISS Staff Onboarding Checklist",
             "ISS Staff",
             "/staff.html",
-            assets_dir
+            template_json
         )
         
         with open(dist_dir / 'staff-manifest.json', 'w', encoding='utf-8') as f:
@@ -329,7 +313,7 @@ def main():
             "ISS Student Onboarding Checklist", 
             "ISS Student",
             "/student.html",
-            assets_dir
+            template_json
         )
         
         with open(dist_dir / 'student-manifest.json', 'w', encoding='utf-8') as f:
