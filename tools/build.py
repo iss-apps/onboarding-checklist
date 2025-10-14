@@ -226,7 +226,7 @@ def build_checklist(markdown_file, output_file, template_html, logo_png, dist_di
         print("    Copying logo file...")
         logo_dest = assets_dir / 'logo-lg.png'
         shutil.copy2(logo_png, logo_dest)
-        logo_data = 'assets/logo-lg.png'  # Use relative path
+        logo_data = 'logo-lg.png'  # Use filename only since CSS will handle the path
         print(f"      Logo copied to {logo_dest}")
     
     # Parse checklist items
@@ -279,15 +279,17 @@ def main():
         # Define paths
         script_dir = Path(__file__).parent
         project_root = script_dir.parent
-        staff_md = project_root / 'staff-onboarding.md'
-        student_md = project_root / 'student-onboarding.md'
-        template_html = project_root / 'doc' / 'template.html'
-        template_json = project_root / 'doc' / 'template.json'
-        logo_png = project_root / 'doc' / 'logo.png'
+        staff_md = project_root / 'staff.md'
+        student_md = project_root / 'student.md'
+        template_html = project_root / 'template' / 'template.html'
+        template_json = project_root / 'template' / 'template.json'
+        logo_png = project_root / 'img' / 'logo.png'
         dist_dir = project_root / 'dist'
+        staff_dir = dist_dir / 'staff'
+        student_dir = dist_dir / 'student'
         assets_dir = dist_dir / 'assets'
-        staff_output = dist_dir / 'staff.html'
-        student_output = dist_dir / 'student.html'
+        staff_output = staff_dir / 'index.html'
+        student_output = student_dir / 'index.html'
         
         # Validate input files exist
         required_files = [staff_md, student_md, template_html, template_json, logo_png]
@@ -299,6 +301,8 @@ def main():
         if dist_dir.exists():
             shutil.rmtree(dist_dir)
         dist_dir.mkdir(exist_ok=True)
+        staff_dir.mkdir(exist_ok=True)
+        student_dir.mkdir(exist_ok=True)
         assets_dir.mkdir(exist_ok=True)
         
         print("Building onboarding checklists...")
@@ -313,11 +317,11 @@ def main():
         
         # Build staff checklist
         print("Building staff checklist...")
-        build_checklist(staff_md, staff_output, template_html, logo_png, dist_dir, assets_dir, 'staff-manifest.json')
+        build_checklist(staff_md, staff_output, template_html, logo_png, dist_dir, assets_dir, 'manifest.json')
         
         # Build student checklist
         print("Building student checklist...")
-        build_checklist(student_md, student_output, template_html, logo_png, dist_dir, assets_dir, 'student-manifest.json')
+        build_checklist(student_md, student_output, template_html, logo_png, dist_dir, assets_dir, 'manifest.json')
         
         # Create simplified manifests
         print("Creating PWA manifests...")
@@ -326,12 +330,12 @@ def main():
         staff_manifest = create_simplified_manifest(
             "ISS App",
             "ISS",
-            "staff.html",
+            "index.html",
             template_json,
             version
         )
         
-        with open(dist_dir / 'staff-manifest.json', 'w', encoding='utf-8') as f:
+        with open(staff_dir / 'manifest.json', 'w', encoding='utf-8') as f:
             import json
             json.dump(staff_manifest, f, indent=2)
         
@@ -339,12 +343,12 @@ def main():
         student_manifest = create_simplified_manifest(
             "ISS App", 
             "ISS Student",
-            "student.html",
+            "index.html",
             template_json,
             version
         )
         
-        with open(dist_dir / 'student-manifest.json', 'w', encoding='utf-8') as f:
+        with open(student_dir / 'manifest.json', 'w', encoding='utf-8') as f:
             import json
             json.dump(student_manifest, f, indent=2)
         
@@ -352,8 +356,8 @@ def main():
         print(f"Output files:")
         print(f"  - {staff_output}")
         print(f"  - {student_output}")
-        print(f"  - {dist_dir / 'staff-manifest.json'}")
-        print(f"  - {dist_dir / 'student-manifest.json'}")
+        print(f"  - {staff_dir / 'manifest.json'}")
+        print(f"  - {student_dir / 'manifest.json'}")
         print(f"  - Logo assets in {assets_dir}")
         
     except Exception as e:

@@ -45,6 +45,10 @@
             border-radius: 50%;
             border: 3px solid rgba(255, 255, 255, 0.2);
             display: block;
+            background-image: url('../assets/{{logo}}');
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
         }
 
         .header h1 {
@@ -331,7 +335,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <img src="{{logo}}" alt="ISS Logo" class="logo">
+            <div class="logo"></div>
             <h1>{{title}}</h1>
             <p>{{subtitle}}</p>
         </div>
@@ -343,8 +347,8 @@
         </div>
 
         <div class="footer">
-            Click on any item to mark it as complete ✅
-            <br>
+            <span>Click on any item to mark it as complete ✅</span>
+            <br><br>
             <a href="isstavanger://iss-app.uninstall">Finished? Uninstall this app</a>
         </div>
     </div>
@@ -358,13 +362,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const uninstallLink = document.querySelector('.footer a');
-            uninstallLink.addEventListener('click', function(event) {
-                event.preventDefault();
-                window.location.href = 'isstavanger://iss-app.uninstall';
-                window.close();
-            });
-
             const checklistItems = document.querySelectorAll('.checklist-item');
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');
@@ -417,6 +414,9 @@
                 setTimeout(() => {
                     launchConfetti();
                 }, 100);
+                setTimeout(() => {
+                    window.location.href = 'isstavanger://iss-app.uninstall';
+                }, 5000);
             }
 
             function launchConfetti() {
