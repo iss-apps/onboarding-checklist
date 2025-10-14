@@ -333,7 +333,7 @@ def main():
         staff_manifest = create_simplified_manifest(
             "ISS App",
             "ISS",
-            "index.html",
+            "https://iss-apps.github.io/onboarding-checklist/staff/",
             template_json,
             version
         )
@@ -346,7 +346,7 @@ def main():
         student_manifest = create_simplified_manifest(
             "ISS App", 
             "ISS Student",
-            "index.html",
+            "https://iss-apps.github.io/onboarding-checklist/student/",
             template_json,
             version
         )
