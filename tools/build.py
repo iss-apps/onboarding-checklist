@@ -208,7 +208,7 @@ def lint_html(html_content):
 
 
 
-def build_checklist(markdown_file, output_file, template_html, logo_png, dist_dir, assets_dir, manifest_path):
+def build_checklist(markdown_file, output_file, template_html, logo_png, dist_dir, assets_dir, manifest_path, version):
     """Build a single checklist from markdown file."""
     print(f"  Processing {markdown_file.name}...")
     
@@ -238,9 +238,12 @@ def build_checklist(markdown_file, output_file, template_html, logo_png, dist_di
     print("    Generating checklist HTML...")
     checklist_html = generate_checklist_html(items)
     
+    # Add cache busting to manifest path
+    manifest_with_cache_bust = f"{manifest_path}?v={version}"
+    
     # Fill template
     print("    Filling template...")
-    final_html = fill_template(template_html, frontmatter, checklist_html, logo_data, manifest_path)
+    final_html = fill_template(template_html, frontmatter, checklist_html, logo_data, manifest_with_cache_bust)
     
     # Lint HTML
     print("    Linting HTML...")
@@ -317,11 +320,11 @@ def main():
         
         # Build staff checklist
         print("Building staff checklist...")
-        build_checklist(staff_md, staff_output, template_html, logo_png, dist_dir, assets_dir, 'manifest.json')
+        build_checklist(staff_md, staff_output, template_html, logo_png, dist_dir, assets_dir, 'manifest.json', version)
         
         # Build student checklist
         print("Building student checklist...")
-        build_checklist(student_md, student_output, template_html, logo_png, dist_dir, assets_dir, 'manifest.json')
+        build_checklist(student_md, student_output, template_html, logo_png, dist_dir, assets_dir, 'manifest.json', version)
         
         # Create simplified manifests
         print("Creating PWA manifests...")
