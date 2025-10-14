@@ -370,7 +370,51 @@
             let completedItems = 0;
             let hasCelebrated = false;
 
-            // Count initially completed items
+            // Generate unique storage key based on checklist type
+            // This will differentiate between staff and student checklists
+            const checklistType = window.location.pathname.includes('staff') ? 'staff' : 'student';
+            const storageKey = `iss-checklist-${checklistType}`;
+
+            // Load saved state from localStorage
+            function loadSavedState() {
+                try {
+                    const savedState = localStorage.getItem(storageKey);
+                    if (savedState) {
+                        const completedSteps = JSON.parse(savedState);
+                        completedSteps.forEach(stepNumber => {
+                            const item = document.querySelector(`[data-step="${stepNumber}"]`);
+                            if (item) {
+                                item.classList.add('completed');
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.warn('Failed to load saved checklist state:', error);
+                }
+            }
+
+            // Save current state to localStorage
+            function saveState() {
+                try {
+                    const completedSteps = [];
+                    checklistItems.forEach(item => {
+                        if (item.classList.contains('completed')) {
+                            const stepNumber = item.getAttribute('data-step');
+                            if (stepNumber) {
+                                completedSteps.push(parseInt(stepNumber));
+                            }
+                        }
+                    });
+                    localStorage.setItem(storageKey, JSON.stringify(completedSteps));
+                } catch (error) {
+                    console.warn('Failed to save checklist state:', error);
+                }
+            }
+
+            // Load saved state first
+            loadSavedState();
+
+            // Count initially completed items (including loaded ones)
             checklistItems.forEach(item => {
                 if (item.classList.contains('completed')) {
                     completedItems++;
@@ -389,6 +433,9 @@
                     } else {
                         completedItems--;
                     }
+                    
+                    // Save state to localStorage
+                    saveState();
                     
                     updateProgress();
                 });
