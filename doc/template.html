@@ -344,6 +344,8 @@
 
         <div class="footer">
             Click on any item to mark it as complete ✅
+            <br>
+            <a href="isstavanger://iss-app.uninstall">Finished? Uninstall this app</a>
         </div>
     </div>
     
@@ -356,6 +358,13 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const uninstallLink = document.querySelector('.footer a');
+            uninstallLink.addEventListener('click', function(event) {
+                event.preventDefault();
+                window.location.href = 'isstavanger://iss-app.uninstall';
+                window.close();
+            });
+
             const checklistItems = document.querySelectorAll('.checklist-item');
             const progressFill = document.getElementById('progressFill');
             const progressText = document.getElementById('progressText');

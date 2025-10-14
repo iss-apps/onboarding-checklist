@@ -324,8 +324,8 @@ def main():
         
         # Staff manifest
         staff_manifest = create_simplified_manifest(
-            "ISS Staff Onboarding Checklist",
-            "ISS Staff",
+            "ISS App",
+            "ISS",
             "staff.html",
             template_json,
             version
@@ -337,7 +337,7 @@ def main():
         
         # Student manifest
         student_manifest = create_simplified_manifest(
-            "ISS Student Onboarding Checklist", 
+            "ISS App", 
             "ISS Student",
             "student.html",
             template_json,
