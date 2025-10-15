@@ -5,7 +5,7 @@ description: "Welcome to ISS! This checklist will guide you through the essentia
 ---
 
 - [ ] **Set Chrome as your default web browser**
-  - **System Settings** → **Desktop & Dock** → **Default web browser** → **Google Chrome**
+  - [**System Settings** → **Desktop & Dock**](isstavanger://settings.dock) → **Default web browser** → **Google Chrome**
 
 - [ ] **Sign into Chrome with your school account**
   - Open Chrome and follow prompts to sign-in

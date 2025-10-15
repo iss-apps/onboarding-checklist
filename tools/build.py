@@ -110,7 +110,7 @@ def convert_markdown_to_html(text):
     # Convert bold markdown to HTML
     text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
     # Convert links markdown to HTML
-    text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2" target="_blank">\1</a>', text)
+    text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', text)
     return text
 
 def parse_checklist_items(markdown_content):

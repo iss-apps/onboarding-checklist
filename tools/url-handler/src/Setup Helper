@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Watches for existence of ~/Library/Application Support/Tools/ISS App.app
+# then opens it when it appears
+
+while true; do
+    if [ -d "$HOME/Applications/Chrome Apps.localized/ISS App.app" ]; then
+        echo $(date) - ISS App.app found
+        open -a "$HOME/Applications/Chrome Apps.localized/ISS App.app" && echo $(date) - ISS App.app opened
+        break
+    fi
+    echo $(date) - Waiting for ISS App.app to appear
+    sleep 1
+done
+
+# nuke self when done
+echo $(date) - Nuking self
+launchctl unload "$HOME/Library/LaunchAgents/setup-helper.plist"
+rm "$HOME/Library/LaunchAgents/setup-helper.plist"
+rm "$0"
+exit 0
