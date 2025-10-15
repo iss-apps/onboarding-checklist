@@ -424,7 +424,13 @@
             updateProgress();
 
             checklistItems.forEach((item, index) => {
-                item.addEventListener('click', function() {
+                item.addEventListener('click', function(event) {
+                    // Check if the clicked element is a link or inside a link
+                    if (event.target.tagName === 'A' || event.target.closest('a')) {
+                        // Don't toggle the checklist item if a link was clicked
+                        return;
+                    }
+                    
                     this.classList.toggle('completed');
                     
                     // Update completed count
