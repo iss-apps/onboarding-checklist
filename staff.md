@@ -45,3 +45,7 @@ description: "Welcome to ISS! This checklist will guide you through the essentia
   - Check your [inbox](https://gmail.com) for the one-time verification code.
   - Scan the MFA QR code on your Mac, iPad, and cell phone.
   - Once the code is on all devices, click to continue and enter the time-based code.
+     
+- [ ] **Sign into Guardey**
+
+- [ ] **Sign into PlusOffice**
